@@ -6,28 +6,42 @@ public class KiwiLandTrain {
 	ArrayList<KiwiLandRoute> routes;  //we create an ArrayList for all the routes that we get from the args of the main
 	ArrayList<String> origins; //useful information that we might need if the origins are more than the test input put
 	ArrayList<String> destinations; //the same as above but with the destinations
-	ArrayList <String[]> routesToCalculate;
-	ArrayList <String> distancesCalculated;
+	ArrayList <ArrayList<String>> routesToCalculate; //to input the routes to calculate
+	ArrayList <String> distancesCalculated; //to get the values of the distances calculated
 	public static void main(String [] args)
 	{
-
-		KiwiLandTrain kiwiLandSystem = new KiwiLandTrain(new ArrayList<KiwiLandRoute>(),new ArrayList<String>(),new ArrayList<String>(),new ArrayList <String[]>(),new ArrayList <String>());
+		KiwiLandTrain kiwiLandSystem = new KiwiLandTrain(new ArrayList<KiwiLandRoute>(),new ArrayList<String>(),new ArrayList<String>(),new ArrayList <ArrayList<String>>(),new ArrayList <String>());
 		//We add the routes given by the args
 		kiwiLandSystem.addRoutesGiven(args);
-		//We get all the possible origins and all the possible destinations
-		kiwiLandSystem.addPossibleOrigins(args);
-		kiwiLandSystem.addPossibleDestinations(args);
-		//We add the routes that we need to calculate the distance
-		kiwiLandSystem.addRoutesToCalculate();
-		//Now we calculate the outputs of the distances
-		kiwiLandSystem.calculateDistances();
-		//Finally, we print our results 
-		kiwiLandSystem.printResults();
-		
+		if(kiwiLandSystem.getRoutes().size()>0) {
+			//We get all the possible origins and all the possible destinations
+			kiwiLandSystem.addPossibleOrigins(args);
+			kiwiLandSystem.addPossibleDestinations(args);
+			//We add the routes that we need to calculate the distance
+			kiwiLandSystem.addRoutesToCalculate();
+			//Now we calculate the outputs of the distances
+			if(kiwiLandSystem.getRoutesToCalculate().size()>0) {
+				kiwiLandSystem.calculateDistances();
+				//Finally, we print our results 
+				kiwiLandSystem.printResults();
+			}
+		}	
 	}
 	
 	private void printResults() {
 		int i= 0;
+		System.out.print("Graph: ");
+		for(KiwiLandRoute r : routes) {
+			System.out.print(r.toString());
+			i++;
+			if(i != routes.size()) {
+				System.out.print(", ");
+			}
+			else {
+				System.out.println("");
+			}
+		}
+		System.out.println("Expected Output:");
 		for(String distance:distancesCalculated) {
 			i++;
 			System.out.println("Output #"+i+": "+distance);
@@ -37,9 +51,27 @@ public class KiwiLandTrain {
 
 	//method to add the routes to calculate in the system
 	private void addRoutesToCalculate() {
-		//Routes to calculate predefined, can be more or less
+		//Routes to calculate are asked to the user
 		try{
-			String[] s1 = {"A","B","C"};
+			String routescanned = "";
+			while (!routescanned.equals("-1")) {
+				System.out.println("Enter a route to be calculated: (for example ABC)");
+				System.out.println("If you want to finish adding routes, enter -1");
+				Scanner scanner = new Scanner(System.in);
+				routescanned = scanner.nextLine();
+				System.out.println("Your route is " + routescanned);
+				if(!routescanned.equals("-1")) { //If the user puts a -1, the program stops asking
+					ArrayList<String> s1 = new ArrayList<String>();
+					for(int i = 0;i<routescanned.length();i++) {
+						s1.add(routescanned.substring(i,i+1));
+					}
+					routesToCalculate.add(s1);
+				}
+				
+			}
+			/*
+			OLD VERSIONS, PREDEFINED BY TEST
+			String[] s1 = {"A","B","C"}; 
 			String[] s2 = {"A","D"};
 			String[] s3 = {"A","D","C"};
 			String[] s4 = {"A","E","B","C","D"};
@@ -48,7 +80,7 @@ public class KiwiLandTrain {
 			routesToCalculate.add(s2);
 			routesToCalculate.add(s3);
 			routesToCalculate.add(s4);
-			routesToCalculate.add(s5);
+			routesToCalculate.add(s5); */
 		}catch(Exception e) {
 			System.err.println("Error within the addition of the routes to calculate");
 		}
@@ -60,10 +92,19 @@ public class KiwiLandTrain {
 		for(String argRoutes: args) {
 			try {
 				argRoutes = argRoutes.replaceAll(",",""); //we delete all the commas from the input args
-				KiwiLandRoute actualRoute = new KiwiLandRoute(argRoutes.substring(0, 1),argRoutes.substring(1, 2),Integer.parseInt(argRoutes.substring(2, 3))); //we create an object of type Kiwiland for putting it in the list created before
+				if(argRoutes.length()>3) {
+					throw new IllegalArgumentException();
+				}
+				int distance = Integer.parseInt(argRoutes.substring(2, 3)); //here we check if the distance is well, if not it will throw the catch exception and pass this one
+				String origen = argRoutes.substring(0, 1).toUpperCase();
+				String destination = argRoutes.substring(1, 2).toUpperCase();
+				KiwiLandRoute actualRoute = new KiwiLandRoute(origen,destination,distance); //we create an object of type Kiwiland for putting it in the list created before
 				routes.add(actualRoute); //we add the route to the list of routes	
-			}catch(Exception e) {
-				System.err.println("Error within the addition of the routes to the list");
+			}catch(NumberFormatException e) { //when the integer for example cant be casted from the string arg
+				System.err.println("Error with one of the arguments passed in the main: "+argRoutes);
+			}
+			catch(IllegalArgumentException  s) { //when the argument is too big
+				System.err.println("The next argument is longer than the expected: "+argRoutes);
 			}
 		}
 	}
@@ -99,12 +140,12 @@ public class KiwiLandTrain {
 	//method to calculate all the distances needed for getting the output
 	public void calculateDistances() {
 		try {
-			for(String[] stations: routesToCalculate) {
+			for(ArrayList<String> stations: routesToCalculate) {
 				int distanceActual = 0;
-				for(int i=0;i<stations.length - 1;i++) {
-					distanceActual = distanceActual + calculateDistance(stations[i],stations[i+1]);
+				for(int i=0;i<stations.size() - 1;i++) {
+					distanceActual = distanceActual + calculateDistance(stations.get(i),stations.get(i+1));
 				}
-				if (distanceActual<0) { //Puting a threshold verylow helps getting the exception of No such route
+				if (distanceActual<0) { //Puting a threshold very low helps getting the exception of No such route
 					distancesCalculated.add("NO SUCH ROUTE");
 					
 				}else {
@@ -113,6 +154,7 @@ public class KiwiLandTrain {
 			}
 		}catch(Exception e) {
 			System.err.println("Error within the calculation of the distances in total");
+			distancesCalculated.add("ERROR IN CALCULATING DISTANCES");
 		}
 	}
 	
@@ -139,12 +181,12 @@ public class KiwiLandTrain {
 		this.routes = new ArrayList<KiwiLandRoute>();
 		this.origins = new ArrayList<String>();
 		this.destinations = new ArrayList<String>();
-		this.routesToCalculate = new ArrayList <String[]>();
+		this.routesToCalculate = new ArrayList <ArrayList<String>>();
 		this.distancesCalculated = new ArrayList <String>();
 	}
 	
 	public KiwiLandTrain(ArrayList<KiwiLandRoute> routes, ArrayList<String> origins, ArrayList<String> destinations,
-			ArrayList<String[]> routesToCalculate, ArrayList<String> distancesCalculated) {
+			ArrayList<ArrayList<String>> routesToCalculate, ArrayList<String> distancesCalculated) {
 		super();
 		this.routes = routes;
 		this.origins = origins;
@@ -179,6 +221,22 @@ public class KiwiLandTrain {
 
 	public void setDestinations(ArrayList<String> destinations) {
 		this.destinations = destinations;
+	}
+
+	public ArrayList<ArrayList<String>> getRoutesToCalculate() {
+		return routesToCalculate;
+	}
+
+	public void setRoutesToCalculate(ArrayList<ArrayList<String>> routesToCalculate) {
+		this.routesToCalculate = routesToCalculate;
+	}
+
+	public ArrayList<String> getDistancesCalculated() {
+		return distancesCalculated;
+	}
+
+	public void setDistancesCalculated(ArrayList<String> distancesCalculated) {
+		this.distancesCalculated = distancesCalculated;
 	}
 	
 	

@@ -34,6 +34,10 @@ public class KiwiLandRoute {
 	public void setDistance(int distance) {
 		this.distance = distance;
 	}
+	@Override
+	public String toString() {
+		return origin+destination+distance;
+	}
 	
 	
 
