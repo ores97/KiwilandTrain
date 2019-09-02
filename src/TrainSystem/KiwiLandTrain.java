@@ -10,6 +10,7 @@ public class KiwiLandTrain {
 	ArrayList <String> distancesCalculated; //to get the values of the distances calculated
 	public static void main(String [] args)
 	{
+		//We create the object of the system
 		KiwiLandTrain kiwiLandSystem = new KiwiLandTrain(new ArrayList<KiwiLandRoute>(),new ArrayList<String>(),new ArrayList<String>(),new ArrayList <ArrayList<String>>(),new ArrayList <String>());
 		//We add the routes given by the args
 		kiwiLandSystem.addRoutesGiven(args);
@@ -19,8 +20,8 @@ public class KiwiLandTrain {
 			kiwiLandSystem.addPossibleDestinations(args);
 			//We add the routes that we need to calculate the distance
 			kiwiLandSystem.addRoutesToCalculate();
-			//Now we calculate the outputs of the distances
 			if(kiwiLandSystem.getRoutesToCalculate().size()>0) {
+				//Now we calculate the outputs of the distances
 				kiwiLandSystem.calculateDistances();
 				//Finally, we print our results 
 				kiwiLandSystem.printResults();
