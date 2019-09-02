@@ -1,7 +1,7 @@
 package TrainSystem;
 
 
-
+//Simple class to save all the route's information
 public class KiwiLandRoute {
 	private String origin;
 	private String destination;
