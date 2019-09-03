@@ -33,7 +33,7 @@ public class KiwiLandTrain {
 	//method to print the results as the document asked
 	public void printResults() {
 		int i= 0;
-		String outputResult = "Graph: "; //we put the structure of the document for the given routes
+		outputResult = "Graph: "; //we put the structure of the document for the given routes
 		
 		for(KiwiLandRoute r : routes) {
 			outputResult = outputResult + r.toString();
